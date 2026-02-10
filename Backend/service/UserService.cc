@@ -194,16 +194,12 @@ void UserService::checkData(const std::string &phone_number,
     }
 }
 
-void UserService::addRole(int user_id, 
-                          int role_id)
+void UserService::addRole(int user_id)
 {
-    return repository->addRole(user_id, 
-                               role_id);
+    return repository->addRole(user_id);
 }
 
-bool UserService::deleteRole(int user_id, 
-                             int role_id)
+bool UserService::deleteRole(int user_id)
 {
-    return repository->deleteRole(user_id, 
-                                  role_id);
+    return repository->deleteRole(user_id);
 }

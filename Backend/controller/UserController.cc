@@ -374,9 +374,9 @@ void UserController::deleteUser(const HttpRequestPtr& req,
 
 void UserController::addRole(const HttpRequestPtr& req,
                              std::function<void(const HttpResponsePtr&)>&& callback, 
-                             int user_id, 
-                             int role_id)
+                             int user_id)
 {
+    LOG_ERROR << "addRole";
     // 1. Получаем подключение к БД
     auto dbClient = drogon::app().getDbClient();
     // 2. Создаём сервис
@@ -397,8 +397,7 @@ void UserController::addRole(const HttpRequestPtr& req,
         return;
     }
 
-    userService.addRole(user_id, 
-                        role_id); 
+    userService.addRole(user_id); 
     
     // 3. Возвращаем 201
     auto resp = HttpResponse::newHttpResponse();
@@ -408,9 +407,9 @@ void UserController::addRole(const HttpRequestPtr& req,
 
 void UserController::deleteRole(const HttpRequestPtr& req,
                                 std::function<void(const HttpResponsePtr&)>&& callback, 
-                                int user_id, 
-                                int role_id)
+                                int user_id)
 {
+    LOG_ERROR << "deleteRole";
     // 1. Получаем подключение к БД
     auto dbClient = drogon::app().getDbClient();
     // 2. Создаём сервис
@@ -431,8 +430,7 @@ void UserController::deleteRole(const HttpRequestPtr& req,
         return;
     }
     
-    bool result = userService.deleteRole(user_id, 
-                                         role_id); 
+    bool result = userService.deleteRole(user_id); 
     
     if (!result)
     {

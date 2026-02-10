@@ -36,11 +36,9 @@ class UserRepository
         
         bool deleteUser(int id);
 
-        void addRole(int user_id, 
-                     int role_id);
+        void addRole(int user_id);
 
-        bool deleteRole(int user_id, 
-                        int role_id);
+        bool deleteRole(int user_id);
 
         bool checkUserExists(const std::string &phone_number);
 

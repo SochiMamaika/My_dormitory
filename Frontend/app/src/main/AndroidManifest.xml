@@ -102,6 +102,14 @@
         android:name=".allWidjetForRepairman"
         android:exported="false"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+    <activity
+        android:name=".searchActivity"
+        android:exported="false"
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+    <activity
+        android:name=".UserDetailActivity"
+        android:exported="false"
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 </application>
 
     </manifest>

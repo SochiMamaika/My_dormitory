@@ -39,11 +39,9 @@ class UserService
         void checkData(const std::string &phone_number, 
                        const std::string &password);
         
-        void addRole(int user_id, 
-                     int role_id);
+        void addRole(int user_id);
         
-        bool deleteRole(int user_id, 
-                        int role_id);
+        bool deleteRole(int user_id);
 
 
         bool checkUserExists(std::string phone_number);

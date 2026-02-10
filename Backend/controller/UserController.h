@@ -20,8 +20,8 @@ public:
     ADD_METHOD_TO(UserController::getUsers, "/users", Get);
     ADD_METHOD_TO(UserController::getUser, "/users/{}", Get);
     ADD_METHOD_TO(UserController::deleteUser, "/users/{}", Delete);
-    ADD_METHOD_TO(UserController::addRole, "/users/{}/{}",Put);
-    ADD_METHOD_TO(UserController::deleteRole, "/users/{}/{}",Delete);
+    ADD_METHOD_TO(UserController::addRole, "/user/{}",Put);
+    ADD_METHOD_TO(UserController::deleteRole, "/user/{}",Delete);
     METHOD_LIST_END
 
     void login(const HttpRequestPtr& req,
@@ -43,8 +43,8 @@ public:
                     std::function<void(const HttpResponsePtr&)>&& callback, int userId);
 
     void addRole(const HttpRequestPtr& req,
-                 std::function<void(const HttpResponsePtr&)>&& callback, int user_id, int role_id);
+                 std::function<void(const HttpResponsePtr&)>&& callback, int user_id);
 
     void deleteRole(const HttpRequestPtr& req,
-                    std::function<void(const HttpResponsePtr&)>&& callback, int user_id, int role_id);
+                    std::function<void(const HttpResponsePtr&)>&& callback, int user_id);
 };

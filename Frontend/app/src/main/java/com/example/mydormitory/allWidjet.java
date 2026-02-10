@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class allWidjet extends AppCompatActivity
 {
-    private ImageButton openNewsButton, openDocumentButton, openMachineButton, openAvitostanButton, openGuideButton, openRepairButton, exitButton;
+    private ImageButton openNewsButton, openDocumentButton, openMachineButton, openAvitostanButton, openGuideButton, openRepairButton, exitButton, searchButton;
     private String accessToken, refreshToken, userType;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,87 +39,59 @@ public class allWidjet extends AppCompatActivity
         openGuideButton = findViewById(R.id.openGuideButton);
         openRepairButton = findViewById(R.id.openRepairButton);
         exitButton = findViewById(R.id.exitButton);
+        searchButton = findViewById(R.id.searchButton);
 
-        openNewsButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, newsActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        openNewsButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, newsActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        exitButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.remove("access_token");
-                editor.remove("refresh_token");
-                editor.apply();
-                Intent intent = new Intent (allWidjet.this, loginActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        searchButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, searchActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        openDocumentButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, documentsActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        exitButton.setOnClickListener(v -> {
+            SharedPreferences prefs1 = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs1.edit();
+            editor.remove("access_token");
+            editor.remove("refresh_token");
+            editor.apply();
+            Intent intent = new Intent (allWidjet.this, loginActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        openMachineButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, reserveMachineActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        openDocumentButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, documentsActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        openAvitostanButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, avitostanActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        openMachineButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, reserveMachineActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        openGuideButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, guideActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        openAvitostanButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, avitostanActivity.class);
+            startActivity(intent);
+            finish();
         });
 
-        openRepairButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (allWidjet.this, repairActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        openGuideButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, guideActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        openRepairButton.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, repairActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }

@@ -34,7 +34,7 @@ UserData UserRepository::createUser(const std::string &phone_number,
     }
     user.setDocuments(document);
     // 2. Назначаем роли
-    std::vector<std::string> roleNames = {"news_read", "user_read", "tutor_read", "file_read", "wash_machine_read"};
+    std::vector<std::string> roleNames = {"news_read", "user_read", "tutor_read", "file_read", "wash_machine_read, repair_read"};
 
     for (const auto &roleName : roleNames)
     {
@@ -97,7 +97,7 @@ UserData UserRepository::createRepairMan(const std::string &phone_number,
     }
     repair.setDocuments(document);
     // 2. Назначаем роли
-    std::vector<std::string> roleNames = {"news_read", "user_read", "tutor_read", "file_read", "wash_machine_read"};
+    std::vector<std::string> roleNames = {"news_read", "user_read", "tutor_read", "file_read", "wash_machine_read, repair_read"};
 
     for (const auto &roleName : roleNames)
     {
@@ -438,25 +438,66 @@ bool UserRepository::deleteUser(int id)
 }
 
 
-void UserRepository::addRole(int user_id, 
-                             int role_id) 
+void UserRepository::addRole(int user_id) 
 {
-    auto result = db_->execSqlSync
-    (
-        "INSERT INTO users_roles (user_id, role_id) " 
-        "VALUES ($1, $2) ", 
-        user_id, role_id
-    );
+    auto trans = db_->newTransaction();
+    std::vector<std::string> roleNames = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write"};
+    
+    for (const auto &roleName : roleNames)
+    {
+        auto roleResult = trans->execSqlSync
+        (
+            "SELECT id FROM roles WHERE role_type = $1 ",
+            roleName
+        );
+        if (roleResult.empty())
+        {
+            LOG_WARN << "Роль " << roleName << " не найдена!";
+            continue;
+        }
+        
+        int roleId = roleResult[0]["id"].as<int>();
+        auto existingRole = trans->execSqlSync
+        (
+            "SELECT 1 FROM users_roles WHERE user_id = $1 AND role_id = $2",
+            user_id, roleId
+        );
+        
+        if (existingRole.empty())
+        {
+            trans->execSqlSync
+            (
+                "INSERT INTO users_roles (user_id, role_id) VALUES ($1, $2)",
+                user_id, roleId
+            );
+        }
+    }
 }
 
-bool UserRepository::deleteRole(int user_id, 
-                                int role_id)
+bool UserRepository::deleteRole(int user_id)
 {
-    auto result = db_->execSqlSync
-    (
-        "DELETE FROM users_roles " 
-        "WHERE user_id = $1 AND role_id = $2", 
-        user_id, role_id
-    );
-    return !result.affectedRows() == 0;
+    auto trans = db_->newTransaction();
+    
+    // Удаляем все роли, которые были добавлены через addRole()
+    std::vector<std::string> rolesToDelete = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write"};
+    
+    for (const auto &roleName : rolesToDelete)
+    {
+        auto roleResult = trans->execSqlSync
+        (
+            "SELECT id FROM roles WHERE role_type = $1",
+            roleName
+        );
+        
+        if (!roleResult.empty())
+        {
+            int roleId = roleResult[0]["id"].as<int>();
+            trans->execSqlSync
+            (
+                "DELETE FROM users_roles WHERE user_id = $1 AND role_id = $2",
+                user_id, roleId
+            );
+        }
+    }
+    return true;
 }
