@@ -4,16 +4,17 @@ News NewsRepository::createNews(const std::string header,
                                 const std::string author,
                                 const std::string date_start, 
                                 const std::string date_end,
-                                const std::list<std::string> image_paths)
+                                const std::list<std::string> image_paths,
+                                int user_id)
 {
     auto trans = db_->newTransaction();
     // Вставляем саму новость
     auto result = trans->execSqlSync
     (
-        "INSERT INTO news (header, body, author, date_start, date_end) "
-        "VALUES ($1, $2, $3, $4, $5) "
+        "INSERT INTO news (header, body, author, date_start, date_end, creator_id) "
+        "VALUES ($1, $2, $3, $4, $5, $6) "
         "RETURNING id, header, body, author, date, date_start, date_end",
-        header, body, author, date_start, date_end
+        header, body, author, date_start, date_end, user_id
     );
 
     News news;

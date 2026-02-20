@@ -10,9 +10,11 @@ WashMachineService::WashMachineService(const drogon::orm::DbClientPtr& dbClient)
     return repository->getWashMachines();
 }
 
-void WashMachineService::addWashMachine(const std::string name)
+void WashMachineService::addWashMachine(const std::string name,
+                                        int user_id)
 {
-    repository->addWashMachine(name);
+    repository->addWashMachine(name,
+                               user_id);
 }
 
 bool WashMachineService::deleteWashMachine(int id)

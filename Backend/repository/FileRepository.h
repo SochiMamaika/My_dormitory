@@ -12,7 +12,8 @@ class FileRepository
 
         // Создать пользователя в БД
         File createFile(const std::string body, 
-                        std::list<std::string> file_path);
+                        std::list<std::string> file_path,
+                        int user_id);
         
         // Удаление
         bool deleteFile(int id_tutor);

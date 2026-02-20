@@ -205,6 +205,7 @@ void RepairController::deleteRepair(const HttpRequestPtr& req,
                                     std::function<void(const HttpResponsePtr&)>&& callback, 
                                     int id_repair, int id_user)
 {
+    LOG_ERROR << "Зашли в deleteRepair";
     std::string token = Headerhelper::getTokenFromHeaders(req);
     auto decoded = jwt::decode<traits>(token);
     
@@ -214,7 +215,7 @@ void RepairController::deleteRepair(const HttpRequestPtr& req,
         return;
     }
     
-    if (!Headerhelper::checkRoles(decoded, "repair_write") && id_user != decoded.get_payload_claim("id").as_integer())
+    if (!Headerhelper::checkRoles(decoded, "repair_write") && id_user != decoded.get_payload_claim("Id").as_integer())
     {
         throw std::runtime_error("Not rights Role - Repair_write");
     }
@@ -230,6 +231,7 @@ void RepairController::deleteRepair(const HttpRequestPtr& req,
         auto resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k404NotFound);
         callback(resp);
+        return;
     }
     auto resp = HttpResponse::newHttpResponse();
     // 3. Возвращаем 204 No Content

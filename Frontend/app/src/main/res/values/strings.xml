@@ -96,8 +96,8 @@
     <!-- Новости -->
     <string name="date_start_for_news">Дата начала</string>
     <string name="date_end_for_news">Дата окончания</string>
-    <string name="date_start_for_news_example">Дата в формате 25.12.2015</string>
-    <string name="date_end_for_news_example">Дата в формате 25.12.2015</string>
+    <string name="date_start_for_news_example">Дата в формате 2015-12-27</string>
+    <string name="date_end_for_news_example">Дата в формате 2015-12-28</string>
     <string name="news_for_title">Создать новость</string>
     <string name="news_author">Введите автора</string>
 

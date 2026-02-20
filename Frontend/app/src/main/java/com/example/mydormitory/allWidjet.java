@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class allWidjet extends AppCompatActivity
 {
-    private ImageButton openNewsButton, openDocumentButton, openMachineButton, openAvitostanButton, openGuideButton, openRepairButton, exitButton, searchButton;
+    private ImageButton openNewsButton, openDocumentButton, openMachineButton, openAvitostanButton, openGuideButton, openRepairButton, exitButton, searchButton, openMyInfoBtn;
     private String accessToken, refreshToken, userType;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -40,9 +40,18 @@ public class allWidjet extends AppCompatActivity
         openRepairButton = findViewById(R.id.openRepairButton);
         exitButton = findViewById(R.id.exitButton);
         searchButton = findViewById(R.id.searchButton);
+        openMyInfoBtn = findViewById(R.id.openMyInfoBtn);
 
         openNewsButton.setOnClickListener(v -> {
             Intent intent = new Intent (allWidjet.this, newsActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        openMyInfoBtn.setOnClickListener(v -> {
+            Intent intent = new Intent (allWidjet.this, UserDetailActivity.class);
+            intent.putExtra("user_id", utils.getUserIdFromToken(this, accessToken, refreshToken));
+            intent.putExtra("user_type", "Студент");
             startActivity(intent);
             finish();
         });

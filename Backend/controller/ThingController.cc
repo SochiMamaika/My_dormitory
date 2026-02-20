@@ -10,6 +10,9 @@ void ThingController::postThing(const HttpRequestPtr& req,
         Headerhelper::responseCheckToken(callback);
         return;
     }
+
+    int user_id = decoded.get_payload_claim("Id").as_integer();
+
     // Получаем JSON данные
     auto json = req->getJsonObject();
     if (!json) 
@@ -45,7 +48,8 @@ void ThingController::postThing(const HttpRequestPtr& req,
     auto thing_data = thing.createThing(type, 
                                         body, 
                                         room,
-                                        thing_paths);
+                                        thing_paths,
+                                        user_id);
 
     // 3. Формируем JSON-ответ
     Json::Value jsonThing;

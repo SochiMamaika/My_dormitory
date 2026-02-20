@@ -12,7 +12,8 @@ class TutorRepository
 
         Tutor createTutor(const std::string header, 
                           const std::string body, 
-                          const std::list<std::string> image_path);
+                          const std::list<std::string> image_path,
+                          int user_id);
         
         bool deleteTutor(int id_tutor);
 

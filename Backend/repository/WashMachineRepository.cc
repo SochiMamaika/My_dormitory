@@ -53,11 +53,13 @@ bool WashMachineRepository::deleteWashMachine(int id)
     return result.affectedRows() > 0;
 }
 
-void WashMachineRepository::addWashMachine(const std::string &name)
+void WashMachineRepository::addWashMachine(const std::string &name,
+                                            int user_id)
 {
     db_->execSqlSync
     (
-        "INSERT INTO machines(name) "
-        "VALUES($1)", name
+        "INSERT INTO machines(name, creator_id) "
+        "VALUES($1, $2)", 
+        name, user_id
     );
 }

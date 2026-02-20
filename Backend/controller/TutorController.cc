@@ -9,6 +9,8 @@ void TutorController::postTutor(const HttpRequestPtr& req,
         Headerhelper::responseCheckToken(callback);
         return;
     }
+
+    int user_id = decoded.get_payload_claim("Id").as_integer();
         
     if (!Headerhelper::checkRoles(decoded,"tutor_write"))
     {
@@ -50,7 +52,8 @@ void TutorController::postTutor(const HttpRequestPtr& req,
     
     auto tutor_data = tutor.createTutor(header,
                                         body,
-                                        image_paths);
+                                        image_paths,
+                                        user_id);
 
     // 3. Формируем JSON-ответ
     Json::Value jsonTutor;

@@ -7,12 +7,14 @@ ThingService::ThingService(const drogon::orm::DbClientPtr& dbClient)
 Thing ThingService::createThing(std::string type,
                                 std::string body,
                                 int room,
-                                std::list<std::string> file_path)
+                                std::list<std::string> file_path,
+                                int user_id)
 {
     return repository->createThing(type, 
                                    body,
                                    room,
-                                   file_path);
+                                   file_path,
+                                   user_id);
 }
 
 

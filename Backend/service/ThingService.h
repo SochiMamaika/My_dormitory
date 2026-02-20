@@ -21,7 +21,8 @@ class ThingService
         Thing createThing(std::string type,
                           std::string body,
                           int room,
-                          std::list<std::string> file_path);
+                          std::list<std::string> file_path,
+                          int user_id);
 
         bool deleteThing(int id_thing);
 

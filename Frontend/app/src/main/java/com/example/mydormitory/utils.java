@@ -14,6 +14,8 @@ import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
@@ -51,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.crypto.SecretKey;
 
@@ -59,6 +63,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 public class utils {
+
+    private static ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static Handler mainHandler = new Handler(Looper.getMainLooper());
+
     public static String uploadFileToServer(Context context, Uri fileUri, String folder, String fileType) throws Exception {
         String uploadUrl = "http://10.0.2.2:3000/file/" + folder;
         ContentResolver resolver = context.getContentResolver();
@@ -158,7 +166,7 @@ public class utils {
     }
 
     public static List<String> getUserRolesFromToken(Context context, String token, String refreshToken) {
-    List<String> defaultEmptyList = new ArrayList<>();
+        List<String> defaultEmptyList = new ArrayList<>();
 
         if (token == null || token.isEmpty()) {
             Log.d("TokenDebug", "Токен пустой");
@@ -186,8 +194,27 @@ public class utils {
             Log.d("TokenDebug", "Ошибка парсинга ролей, пробуем обновить: " + e.getMessage());
 
             if (refreshToken != null && !refreshToken.isEmpty()) {
-                boolean refreshed = refreshAccessToken(context, refreshToken);
-                if (refreshed) {
+                // Запускаем обновление в фоне и синхронно ждем результат
+                final boolean[] refreshed = {false};
+                final Object lock = new Object();
+
+                executor.execute(() -> {
+                    boolean result = refreshAccessTokenSync(context, refreshToken);
+                    synchronized (lock) {
+                        refreshed[0] = result;
+                        lock.notify();
+                    }
+                });
+
+                try {
+                    synchronized (lock) {
+                        lock.wait(10000); // ждем до 10 секунд
+                    }
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+
+                if (refreshed[0]) {
                     SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
                     String newToken = prefs.getString("access_token", null);
 
@@ -234,13 +261,33 @@ public class utils {
                 Log.d("TokenDebug", "Ошибка парсинга токена, пробуем обновить: " + e.getMessage());
 
                 if (refreshToken != null && !refreshToken.isEmpty()) {
-                    boolean refreshed = refreshAccessToken(context, refreshToken);
-                    if (refreshed) {
+                    // Запускаем обновление в фоне и синхронно ждем результат
+                    final boolean[] refreshed = {false};
+                    final Object lock = new Object();
+
+                    executor.execute(() -> {
+                        boolean result = refreshAccessTokenSync(context, refreshToken);
+                        synchronized (lock) {
+                            refreshed[0] = result;
+                            lock.notify();
+                        }
+                    });
+
+                    try {
+                        synchronized (lock) {
+                            lock.wait(10000); // ждем до 10 секунд
+                        }
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    if (refreshed[0]) {
                         SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
                         String newToken = prefs.getString("access_token", null);
+                        String newRfrToken = prefs.getString("refresh_token", null);
 
                         if (newToken != null) {
-                            return getUserIdFromToken(context, newToken, refreshToken);
+                            return getUserIdFromToken(context, newToken, newRfrToken);
                         }
                     }
                 }
@@ -253,11 +300,9 @@ public class utils {
         }
     }
 
-
-    public static boolean refreshAccessToken(Context context, String refreshToken)
-    {
-        try
-        {
+    // Синхронная версия для внутреннего использования
+    private static boolean refreshAccessTokenSync(Context context, String refreshToken) {
+        try {
             String refreshUrl = "http://10.0.2.2:3000/refresh";
 
             JSONObject jsonBody = new JSONObject();
@@ -268,22 +313,34 @@ public class utils {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             conn.setDoOutput(true);
 
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8")))
-            {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"))) {
                 writer.write(jsonBody.toString());
             }
 
             int code = conn.getResponseCode();
-            if (code == HttpURLConnection.HTTP_OK)
-            {
-                String response = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))
-                        .lines().reduce("", (acc, line) -> acc + line);
 
-                JSONObject json = new JSONObject(response);
+            BufferedReader reader;
+            if (code == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+            }
+
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+
+            Log.d("RefreshDebug", "Response code: " + code);
+            Log.d("RefreshDebug", "Response body: " + response.toString());
+
+            if (code == HttpURLConnection.HTTP_OK) {
+                JSONObject json = new JSONObject(response.toString());
                 String newAccess = json.getString("access_token");
                 String newRefresh = json.getString("refresh_token");
 
-                // сохраняем новые токены - используем переданный context
                 SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
                 prefs.edit()
                         .putString("access_token", newAccess)
@@ -292,21 +349,22 @@ public class utils {
 
                 conn.disconnect();
                 return true;
+            } else {
+                Log.e("RefreshError", "Server returned error: " + response.toString());
+                conn.disconnect();
+                return false;
             }
-
-            conn.disconnect();
-            return false;
-
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static String changeDate(String date)
-    {
+    public static boolean refreshAccessToken(Context context, String refreshToken) {
+        return refreshAccessTokenSync(context, refreshToken);
+    }
+
+    public static String changeDate(String date) {
         if (date != null && date.length() >= 16) {
             try {
                 String datePart = date.substring(0, 10);
@@ -373,22 +431,14 @@ public class utils {
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setBackground(null);
 
-        if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png"))
-        {
+        if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png")) {
             loadImage(imageView, filePath);
-        }
-        else
-        {
-            if (filePath.endsWith(".pdf"))
-            {
+        } else {
+            if (filePath.endsWith(".pdf")) {
                 imageView.setImageResource(R.drawable.ic_pdf);
-            }
-            else if (filePath.endsWith(".doc") || filePath.endsWith(".docx"))
-            {
+            } else if (filePath.endsWith(".doc") || filePath.endsWith(".docx")) {
                 imageView.setImageResource(R.drawable.ic_word);
-            }
-            else
-            {
+            } else {
                 imageView.setImageResource(R.drawable.ic_downloads);
             }
         }
@@ -404,20 +454,13 @@ public class utils {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
 
             // MIME тип тоже можно определить прямо здесь
-            if (filePath.endsWith(".pdf"))
-            {
+            if (filePath.endsWith(".pdf")) {
                 request.setMimeType("application/pdf");
-            }
-            else if (filePath.endsWith(".doc") || filePath.endsWith(".docx"))
-            {
+            } else if (filePath.endsWith(".doc") || filePath.endsWith(".docx")) {
                 request.setMimeType("application/msword");
-            }
-            else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg"))
-            {
+            } else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
                 request.setMimeType("image/jpeg");
-            }
-            else if (filePath.endsWith(".png"))
-            {
+            } else if (filePath.endsWith(".png")) {
                 request.setMimeType("image/png");
             }
 

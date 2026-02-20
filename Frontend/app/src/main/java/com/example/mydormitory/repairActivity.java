@@ -24,47 +24,27 @@ public class repairActivity extends AppCompatActivity
         carpenterLayout = findViewById(R.id.carpenterLayout);
         electricianLayout = findViewById(R.id.electricianLayout);
 
-        menuButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (repairActivity.this, allWidjet.class);
-                startActivity(intent);
-            }
+        menuButton.setOnClickListener(v -> {
+            Intent intent = new Intent (repairActivity.this, allWidjet.class);
+            startActivity(intent);
         });
 
-        plumberLayout.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
-                intent.putExtra("repair_type", "plumber");
-                startActivity(intent);
-            }
+        plumberLayout.setOnClickListener(v -> {
+            Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
+            intent.putExtra("repair_type", "plumber");
+            startActivity(intent);
         });
 
-        carpenterLayout.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
-                intent.putExtra("repair_type", "carpenter");
-                startActivity(intent);
-            }
+        carpenterLayout.setOnClickListener(v -> {
+            Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
+            intent.putExtra("repair_type", "carpenter");
+            startActivity(intent);
         });
 
-        electricianLayout.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
-                intent.putExtra("repair_type", "electrician");
-                startActivity(intent);
-            }
+        electricianLayout.setOnClickListener(v -> {
+            Intent intent = new Intent (repairActivity.this, addRepairActivity.class);
+            intent.putExtra("repair_type", "electrician");
+            startActivity(intent);
         });
     }
 

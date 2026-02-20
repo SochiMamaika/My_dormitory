@@ -1,17 +1,18 @@
 #include "FileRepository.h"
 // Создать пользователя в БД
     File FileRepository::createFile(const std::string body, 
-                                    const std::list<std::string> file_paths)
+                                    const std::list<std::string> file_paths,
+                                    int user_id)
 {
     auto transaction = db_->newTransaction();
     
     // Создаем запись файла
     auto result = transaction->execSqlSync
     (
-        "INSERT INTO files (body) "
-        "VALUES ($1) "
+        "INSERT INTO files (body, creator_id) "
+        "VALUES ($1, $2) "
         "RETURNING id, body, date",
-        body
+        body, user_id
     );
     
     File file;

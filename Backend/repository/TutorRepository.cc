@@ -2,17 +2,18 @@
 // Создать пользователя в БД
 Tutor TutorRepository::createTutor(const std::string header, 
                                     const std::string body, 
-                                    const std::list<std::string> image_paths)
+                                    const std::list<std::string> image_paths,
+                                    int user_id)
 {
     auto transaction = db_->newTransaction();
     
     // Создаем преподавателя
     auto result = transaction->execSqlSync
     (
-        "INSERT INTO tutor (header, body) "
-        "VALUES ($1, $2) "
+        "INSERT INTO tutor (header, body, creator_id) "
+        "VALUES ($1, $2, $3) "
         "RETURNING id, header, body, date",
-        header, body
+        header, body, user_id
     );
     
     Tutor tutor;

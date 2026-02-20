@@ -152,6 +152,8 @@ void NewsController::postNews(const HttpRequestPtr& req,
         Headerhelper::responseCheckToken(callback);
         return;
     }
+
+    int user_id = decoded.get_payload_claim("Id").as_integer();
         
     if (!Headerhelper::checkRoles(decoded,"news_write"))
     {
@@ -198,7 +200,8 @@ void NewsController::postNews(const HttpRequestPtr& req,
                                      author,
                                      date_start,
                                      date_end,
-                                     image_paths);
+                                     image_paths,
+                                     user_id);
 
     // 3. Формируем JSON-ответ
     Json::Value jsonNews;

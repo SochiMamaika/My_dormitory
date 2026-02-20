@@ -20,7 +20,8 @@ class WashMachineService
             
         std::list<WashMachine> getWashMachines();
 
-        void addWashMachine(const std::string name);
+        void addWashMachine(const std::string name,
+                            int user_id);
 
         bool deleteWashMachine(int id);
 

@@ -10,7 +10,8 @@ News NewsService::createNews(std::string header,
                              std::string author,
                              std::string date_start,
                              std::string date_end,
-                             std::list<std::string> image_paths)
+                             std::list<std::string> image_paths,
+                             int user_id)
                              
 {
 
@@ -29,7 +30,8 @@ News NewsService::createNews(std::string header,
                                   author,
                                   date_start,
                                   date_end,
-                                  image_paths);
+                                  image_paths,
+                                  user_id);
 }
 
 bool NewsService::deleteNews(int id_news)

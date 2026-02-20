@@ -3,6 +3,8 @@ package com.example.mydormitory;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -10,6 +12,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,6 +73,20 @@ public class guideActivity extends AppCompatActivity {
 
         guideRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         guideRecyclerView.setAdapter(guideAdapter);
+
+        TextInputEditText searchGuide = findViewById(R.id.searchGuide);
+        searchGuide.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                guideAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         // Загрузка данных с API
         loadGuidesFromApi();
@@ -166,7 +184,7 @@ public class guideActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     guideList.clear();
                     guideList.addAll(guides);
-                    guideAdapter.notifyDataSetChanged();
+                    guideAdapter.updateData(guideList);
                 });
 
             } catch (Exception e) {

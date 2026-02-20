@@ -88,10 +88,26 @@ public class UserDetailActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        menuButton.setOnClickListener(v -> startActivity(new Intent(this, searchActivity.class)));
+        menuButton.setOnClickListener(v -> {
+            Intent intent = getIntent();
+            String userType = intent.getStringExtra("user_type");
+
+            if ("Ремонтник".equals(userType))
+            {
+                startActivity(new Intent(UserDetailActivity.this, allWidjetForRepairman.class));
+            }
+            else
+            {
+                startActivity(new Intent(UserDetailActivity.this, allWidjet.class));
+            }
+            finish();
+        });
+
+        // Кнопки администрирования
         makeUserToAdminButton.setOnClickListener(v -> makeUserAdmin());
         removeAdminButton.setOnClickListener(v -> removeAdminRights());
     }
+
 
     private void loadUserDetails() {
         new Thread(() -> {

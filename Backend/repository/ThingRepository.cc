@@ -3,16 +3,17 @@
     Thing ThingRepository::createThing(const std::string type, 
                                        const std::string body, 
                                        int room,
-                                       std::list<std::string> thing_paths)
+                                       std::list<std::string> thing_paths,
+                                       int user_id)
 {
     auto transaction = db_->newTransaction();
     // Создаем запись файла
     auto result = transaction->execSqlSync
     (
-        "INSERT INTO thing (type, body,room) "
-        "VALUES ($1, $2, $3) "
+        "INSERT INTO thing (type, body, room, creator_id) "
+        "VALUES ($1, $2, $3, $4) "
         "RETURNING id, type, body, room, date",
-        type, body, room
+        type, body, room, user_id
     );
     
     Thing thing;

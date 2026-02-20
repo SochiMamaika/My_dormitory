@@ -15,7 +15,8 @@ class WashMachineRepository
 
         bool deleteWashMachine(int id);
 
-        void addWashMachine(const std::string &name);
+        void addWashMachine(const std::string &name,
+                            int user_id);
 
         std::list<ReserveWashMachine> getReserveWashMachines();
 

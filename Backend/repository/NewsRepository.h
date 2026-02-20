@@ -17,7 +17,8 @@ public:
                     const std::string author,
                     const std::string date_start, 
                     const std::string date_end,
-                    const std::list<std::string> image_paths);
+                    const std::list<std::string> image_paths,
+                    int user_id);
     
     // Удаление
     bool deleteNews(int id);

@@ -191,7 +191,7 @@
             android:orientation="vertical">
 
             <ImageButton
-                android:id="@+id/openMyInfoButton"
+                android:id="@+id/openMyInfoBtn"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:background="?attr/selectableItemBackgroundBorderless"

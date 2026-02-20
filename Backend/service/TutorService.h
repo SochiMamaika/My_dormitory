@@ -18,12 +18,10 @@ class TutorService
         // Конструктор
         explicit TutorService(const drogon::orm::DbClientPtr& dbClient);
 
-        Tutor createTutor
-        (
-            std::string header,
-            std::string body,
-            std::list<std::string> image_path
-        );
+        Tutor createTutor(std::string header,
+                          std::string body,
+                          std::list<std::string> image_path,
+                          int user_id);
 
         bool deleteTutor(int id_tutor);
 

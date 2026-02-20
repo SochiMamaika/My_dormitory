@@ -14,7 +14,8 @@ class ThingRepository
         Thing createThing(const std::string type, 
                           const std::string body, 
                           int room,
-                          std::list<std::string> thing_paths);
+                          std::list<std::string> thing_paths,
+                          int user_id);
         
         // Удаление
         bool deleteThing(int id_tutor);

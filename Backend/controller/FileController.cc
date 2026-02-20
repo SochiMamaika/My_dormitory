@@ -10,6 +10,8 @@ void FileController::postFiles(const HttpRequestPtr& req,
         Headerhelper::responseCheckToken(callback);
         return;
     }
+
+    int user_id = decoded.get_payload_claim("Id").as_integer();
         
     if (!Headerhelper::checkRoles(decoded,"file_write"))
     {
@@ -48,7 +50,8 @@ void FileController::postFiles(const HttpRequestPtr& req,
     auto dbClient = drogon::app().getDbClient();
     FileService file(dbClient);
     auto file_data = file.createFile(body, 
-                                     file_paths);
+                                     file_paths,
+                                     user_id);
 
     // 3. Формируем JSON-ответ
     Json::Value jsonUser;

@@ -50,6 +50,29 @@
 
     </LinearLayout>
 
+    <!-- Поле поиска -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchUnput"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/NewsToolbar">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchNews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Поиск новостей..."
+            android:imeOptions="actionSearch"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <!-- RecyclerView для списка гайдов-->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/newsList"
@@ -59,6 +82,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/NewsToolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/searchUnput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

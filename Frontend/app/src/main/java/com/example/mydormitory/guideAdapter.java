@@ -6,21 +6,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class guideAdapter extends RecyclerView.Adapter<guideAdapter.GuideViewHolder> {
 
     private List<guide> guideList;
+
+    private List<guide> guideListFiltered;
     private boolean hasGuidesWriteRole;
 
     public guideAdapter(List<guide> guideList, boolean hasGuidesWriteRole) {
         this.guideList = guideList;
+        this.guideListFiltered = new ArrayList<>(guideList);
         this.hasGuidesWriteRole = hasGuidesWriteRole;
     }
 
@@ -44,7 +50,7 @@ public class guideAdapter extends RecyclerView.Adapter<guideAdapter.GuideViewHol
 
     @Override
     public void onBindViewHolder(@NonNull GuideViewHolder holder, int position) {
-        guide guide = guideList.get(position);
+        guide guide = guideListFiltered.get(position);
 
         holder.guideHeader.setText(guide.getHeader());
         holder.guideBody.setText(guide.getBody());
@@ -71,6 +77,54 @@ public class guideAdapter extends RecyclerView.Adapter<guideAdapter.GuideViewHol
         else {
             holder.btnDeleteFromGuide.setVisibility(View.GONE);
         }
+    }
+
+    public void updateData(List<guide> guideList) {
+        this.guideList = guideList;
+        this.guideListFiltered = new ArrayList<>(guideList);
+        notifyDataSetChanged();
+    }
+
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<guide> filtered = new ArrayList<>();
+
+                if (constraint == null || constraint.length() == 0) {
+                    // Если строка поиска пустая, показываем все новости
+                    filtered.addAll(guideList);
+                } else {
+                    String pattern = constraint.toString().toLowerCase().trim();
+                    for (guide g : guideList) {
+                        // Ищем по заголовку, содержанию, автору и дате
+                        if (g.getHeader().toLowerCase().contains(pattern) ||
+                                g.getBody().toLowerCase().contains(pattern) ||
+                                g.getDate().toLowerCase().contains(pattern)) {
+                            filtered.add(g);
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.values = filtered;
+                results.count = filtered.size();
+                return results;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                guideListFiltered.clear();
+                guideListFiltered.addAll((List<guide>) results.values);
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    @Override
+    public int getItemCount() {
+        return guideListFiltered.size();
     }
 
     private void addImageToContainer(LinearLayout container, String imagePath) {
@@ -102,11 +156,6 @@ public class guideAdapter extends RecyclerView.Adapter<guideAdapter.GuideViewHol
                 Log.e("IMAGE_DEBUG", "Load failed: " + imagePath);
             }
         }).start();
-    }
-
-    @Override
-    public int getItemCount() {
-        return guideList.size();
     }
 
     public static class GuideViewHolder extends RecyclerView.ViewHolder {

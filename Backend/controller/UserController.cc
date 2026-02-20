@@ -302,6 +302,7 @@ void UserController::getUser(const HttpRequestPtr& req,
         auto resp = HttpResponse::newHttpJsonResponse(err);
         resp->setStatusCode(k400BadRequest);
         callback(resp);
+        return;
     }
 
     // 7. Формирование безопасного ответа (без пароля)
@@ -364,6 +365,7 @@ void UserController::deleteUser(const HttpRequestPtr& req,
         auto resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k404NotFound);
         callback(resp);
+        return;
     }
 
     // 3. Возвращаем 204 No Content
@@ -438,6 +440,7 @@ void UserController::deleteRole(const HttpRequestPtr& req,
         auto resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k404NotFound);
         callback(resp);
+        return;
     }
 
     // 3. Возвращаем 204 No Content

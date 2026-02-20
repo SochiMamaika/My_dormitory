@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,15 +15,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class newsAdapter extends RecyclerView.Adapter<newsAdapter.NewsViewHolder> {
 
-    private List<news> newsList;
+    private List<news> newsList; // Оригинальный список
+    private List<news> newsListFiltered; // Отфильтрованный список
     private boolean hasNewsWriteRole;
 
     public newsAdapter(List<news> newsList, boolean hasNewsWriteRole) {
         this.newsList = newsList;
+        this.newsListFiltered = new ArrayList<>(newsList); // Инициализируем отфильтрованный список
         this.hasNewsWriteRole = hasNewsWriteRole;
     }
 
@@ -46,7 +50,7 @@ public class newsAdapter extends RecyclerView.Adapter<newsAdapter.NewsViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
-        news news = newsList.get(position);
+        news news = newsListFiltered.get(position); // Используем отфильтрованный список
 
         holder.newsHeader.setText(news.getHeader());
         holder.newsBody.setText(news.getBody());
@@ -67,13 +71,24 @@ public class newsAdapter extends RecyclerView.Adapter<newsAdapter.NewsViewHolder
             holder.deleteButton.setOnClickListener(v -> {
                 int pos = holder.getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
-                    listener.onDeleteClick(news, pos);
+                    listener.onDeleteClick(newsListFiltered.get(pos), pos); // Используем отфильтрованный список
                 }
             });
-        }
-        else {
+        } else {
             holder.deleteButton.setOnClickListener(null);
         }
+    }
+
+    @Override
+    public int getItemCount() {
+        return newsListFiltered.size(); // Возвращаем размер отфильтрованного списка
+    }
+
+    // Метод для обновления данных
+    public void updateData(List<news> newNewsList) {
+        this.newsList = newNewsList;
+        this.newsListFiltered = new ArrayList<>(newNewsList);
+        notifyDataSetChanged();
     }
 
     private void addImageToContainer(LinearLayout container, String imagePath) {
@@ -107,20 +122,51 @@ public class newsAdapter extends RecyclerView.Adapter<newsAdapter.NewsViewHolder
         }).start();
     }
 
-    @Override
-    public int getItemCount() {
-        return newsList.size();
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<news> filtered = new ArrayList<>();
+
+                if (constraint == null || constraint.length() == 0) {
+                    // Если строка поиска пустая, показываем все новости
+                    filtered.addAll(newsList);
+                } else {
+                    String pattern = constraint.toString().toLowerCase().trim();
+                    for (news n : newsList) {
+                        // Ищем по заголовку, содержанию, автору и дате
+                        if (n.getHeader().toLowerCase().contains(pattern) ||
+                                n.getBody().toLowerCase().contains(pattern) ||
+                                n.getAuthor().toLowerCase().contains(pattern) ||
+                                n.getDate().contains(pattern)) {
+                            filtered.add(n);
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.values = filtered;
+                results.count = filtered.size();
+                return results;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                newsListFiltered.clear();
+                newsListFiltered.addAll((List<news>) results.values);
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public static class NewsViewHolder extends RecyclerView.ViewHolder {
         TextView newsHeader, newsBody, newsDateStartAndEnd, newsAuthor, newsDate;
         LinearLayout filesContainerForNews;
         ImageButton deleteButton;
-        boolean hasNewsWriteRole;
 
         public NewsViewHolder(@NonNull View itemView, boolean hasNewsWriteRole) {
             super(itemView);
-            this.hasNewsWriteRole = hasNewsWriteRole;
 
             newsHeader = itemView.findViewById(R.id.typeRepairman);
             newsBody = itemView.findViewById(R.id.repairmanBody);

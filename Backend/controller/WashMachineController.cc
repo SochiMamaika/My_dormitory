@@ -9,6 +9,8 @@ void WashMachineController::addWashMachine(const HttpRequestPtr& req,
             Headerhelper::responseCheckToken(callback);
             return;
         }
+
+        int user_id = decode.get_payload_claim("Id").as_integer();
         
         if (!Headerhelper::checkRoles(decode, "wash_machine_write"))
         {
@@ -26,7 +28,8 @@ void WashMachineController::addWashMachine(const HttpRequestPtr& req,
         // 3. Получаем подключение к БД
         auto dbClient = drogon::app().getDbClient();
         WashMachineService washmachine(dbClient);
-        washmachine.addWashMachine(name);
+        washmachine.addWashMachine(name,
+                                   user_id);
         
         auto resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k201Created);

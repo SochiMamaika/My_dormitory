@@ -70,13 +70,13 @@ std::list<std::string> UserService::login(const std::string &phone_number,
             jsonRoles.append(role); // Добавляем каждую роль в массив
         }
 
-        // Access token (10 минут)
+        // Access token (5 минут)
         auto access_token = jwt::create<traits>()
         .set_payload_claim("roles", jsonRoles)
         .set_payload_claim("Id", user.getId())
         .set_subject(phone_number)
         .set_type("access")
-        .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes{1})
+        .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes{2})
         .sign(jwt::algorithm::hs256{"my_super_secret_key_bytes_min_wawawawawwawawwawawawawaw"});
 
         // Refresh token (7 дней)
@@ -138,7 +138,7 @@ std::list<std::string> UserService::refreshTokens(const std::string &refresh_tok
             .set_payload_claim("Id", user.getId())
             .set_subject(user.getPhoneNumber())
             .set_type("access")
-            .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes{1})
+            .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes{2})
             .sign(jwt::algorithm::hs256{"my_super_secret_key_bytes_min_wawawawawwawawwawawawawaw"});
         auto new_refresh_token = jwt::create<traits>()
             .set_payload_claim("Id", user.getId())

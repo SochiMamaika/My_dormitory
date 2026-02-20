@@ -20,15 +20,26 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
 
     private List<newsforrepairman> newsList;
     private OnRepairButtonClickListener listener;
+    private OnDeleteButtonClickListener deleteListener; // Для кнопки удаления
+
     public interface OnRepairButtonClickListener {
         void onRepairButtonClick(int position, newsforrepairman news);
     }
+
+    public interface OnDeleteButtonClickListener {
+        void onDeleteButtonClick(int position, newsforrepairman news);
+    }
+
     public NewsForRepairManAdapter(List<newsforrepairman> newsList) {
         this.newsList = newsList;
     }
 
     public void setOnRepairButtonClickListener(OnRepairButtonClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnDeleteButtonClickListener(OnDeleteButtonClickListener listener) {
+        this.deleteListener = listener;
     }
 
     @NonNull
@@ -48,15 +59,24 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
         holder.repairmanDate.setText(news.getDate());
         holder.repairmanRoom.setText("Комната: " + news.getRoom());
         holder.filesContainerForRepairman.removeAllViews();
+
         if (news.getActivity())
         {
             holder.repairmanActivity.setText("Заказ занят");
             holder.buttonActivity.setText("Отменить заказ");
+            if (holder.buttonDeleteRepair != null)
+            {
+                holder.buttonDeleteRepair.setVisibility(View.VISIBLE);
+            }
         }
         else
         {
             holder.repairmanActivity.setText("Заказ свободен");
             holder.buttonActivity.setText("Взять заказ");
+            if (holder.buttonDeleteRepair != null)
+            {
+                holder.buttonDeleteRepair.setVisibility(View.GONE);
+            }
         }
 
         if (news.getNewsPath() != null && !news.getNewsPath().isEmpty()) {
@@ -64,12 +84,23 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
                 addImageToContainer(holder.filesContainerForRepairman, news.getNewsPath().get(i));
             }
         }
-        // Обработка клика по кнопке
+
+        // Обработка клика по кнопке активности (Взять/Отменить)
         holder.buttonActivity.setOnClickListener(v -> {
             if (listener != null) {
                 int adapterPosition = holder.getAdapterPosition();
                 if (adapterPosition != RecyclerView.NO_POSITION) {
                     listener.onRepairButtonClick(adapterPosition, news);
+                }
+            }
+        });
+
+        // Обработка клика по кнопке удаления
+        holder.buttonDeleteRepair.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    deleteListener.onDeleteButtonClick(adapterPosition, news);
                 }
             }
         });
@@ -113,7 +144,7 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
 
     public static class NewsViewHolder extends RecyclerView.ViewHolder {
         TextView typeRepairman, repairmanBody, repairmanDate, repairmanRoom, repairmanActivity;
-        Button buttonActivity;
+        Button buttonActivity, buttonDeleteRepair;
         LinearLayout filesContainerForRepairman;
 
         public NewsViewHolder(@NonNull View itemView) {
@@ -125,6 +156,7 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
             filesContainerForRepairman = itemView.findViewById(R.id.filesContainerForRepairman);
             repairmanActivity = itemView.findViewById(R.id.repairmanActivity);
             buttonActivity = itemView.findViewById(R.id.buttonActivity);
+            buttonDeleteRepair = itemView.findViewById(R.id.buttonDeleteRepair);
         }
     }
 }

@@ -61,7 +61,9 @@ public class allWidjetForRepairman extends AppCompatActivity
         });
 
         openMyInfoButton.setOnClickListener(v -> {
-            Intent intent = new Intent (allWidjetForRepairman.this, MyRepairsActivity.class);
+            Intent intent = new Intent (allWidjetForRepairman.this, UserDetailActivity.class);
+            intent.putExtra("user_id", utils.getUserIdFromToken(this, accessToken, refreshToken));
+            intent.putExtra("user_type", "Ремонтник");
             startActivity(intent);
             finish();
         });

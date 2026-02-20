@@ -118,6 +118,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
+        <Button
+            android:id="@+id/buttonDeleteRepair"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="Завершить заказ"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:backgroundTint="@color/red"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -26,7 +26,8 @@ class NewsService
                         std::string author,
                         std::string date_start,
                         std::string date_end,
-                        std::list<std::string> image_paths);
+                        std::list<std::string> image_paths,
+                        int user_id);
 
         bool deleteNews(int id_news);
 
