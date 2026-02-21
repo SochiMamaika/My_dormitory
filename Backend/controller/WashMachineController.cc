@@ -48,12 +48,6 @@ void WashMachineController::getWashMachines(const HttpRequestPtr& req,
         return;
     }
     LOG_ERROR << "Прошли проверку токена в getWashMachines";
-    
-    if (!Headerhelper::checkRoles(decode, "wash_machine_read"))
-    {
-        Headerhelper::responseCheckRoles(callback);
-        return;
-    }
     // 3. Получаем подключение к БД
     auto dbClient = drogon::app().getDbClient();
     WashMachineService machine (dbClient);

@@ -70,79 +70,64 @@ public class addRepairActivity extends AppCompatActivity
             finish();
         }
 
-        backToRepairButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (addRepairActivity.this, repairActivity.class);
-                startActivity(intent);
-            }
+        backToRepairButton.setOnClickListener(v -> {
+            Intent intent = new Intent (addRepairActivity.this, repairActivity.class);
+            startActivity(intent);
         });
 
-        addPhotoRepairLinearLayout.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(intent, PICK_IMAGE_REQUEST);
-            }
+        addPhotoRepairLinearLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
         });
 
-        publishRepairButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+        publishRepairButton.setOnClickListener(v -> {
+            String details = detailsEditTextRepair.getText().toString();
+            String room = roomsEditTextRepair.getText().toString();
+
+            if(details.isEmpty() || room.isEmpty())
             {
-                String details = detailsEditTextRepair.getText().toString();
-                String room = roomsEditTextRepair.getText().toString();
+                Toast.makeText(addRepairActivity.this, "Нужно заполнить все поля", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int rooms = Integer.parseInt(room);
 
-                if(details.isEmpty() || room.isEmpty())
+            // Запускаем в отдельном потоке чтобы не блокировать UI
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run()
                 {
-                    Toast.makeText(addRepairActivity.this, "Нужно заполнить все поля", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                int rooms = Integer.parseInt(room);
-
-                // Запускаем в отдельном потоке чтобы не блокировать UI
-                new Thread(new Runnable()
-                {
-                    @Override
-                    public void run()
+                    try
                     {
-                        try
+                        // 1. Отправляем фото и получаем их пути
+                        List<String> photoPaths = new ArrayList<>();
+                        for (Uri imageUri : selectedImages)
                         {
-                            // 1. Отправляем фото и получаем их пути
-                            List<String> photoPaths = new ArrayList<>();
-                            for (Uri imageUri : selectedImages)
-                            {
-                                String path = utils.uploadFileToServer(addRepairActivity.this, imageUri,"repair", "photo");
-                                photoPaths.add(path);
-                            }
-
-                            // 2. Отправляем данные о ремонте
-                            sendRepairData(details, rooms, photoPaths, repairType, accessToken, refreshToken);
-
-                            // Показываем успех
-                            runOnUiThread(() -> {
-                                Toast.makeText(addRepairActivity.this, "Успешно отправлено!", Toast.LENGTH_SHORT).show();
-                                finish();
-                            });
-
+                            String path = utils.uploadFileToServer(addRepairActivity.this, imageUri,"repair", "photo");
+                            photoPaths.add(path);
                         }
-                        catch (Exception e)
-                        {
-                            runOnUiThread(() -> {
-                                Toast.makeText(addRepairActivity.this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        }
+
+                        // 2. Отправляем данные о ремонте
+                        sendRepairData(details, rooms, photoPaths, repairType, accessToken, refreshToken);
+
+                        // Показываем успех
+                        runOnUiThread(() -> {
+                            Toast.makeText(addRepairActivity.this, "Успешно отправлено!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+
                     }
-                }).start();
+                    catch (Exception e)
+                    {
+                        runOnUiThread(() -> {
+                            Toast.makeText(addRepairActivity.this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }
+            }).start();
 
-            }
         });
     }
     @Override
@@ -218,6 +203,7 @@ public class addRepairActivity extends AppCompatActivity
         String apiUrl = "http://10.0.2.2:3000/repair";
 
         JSONObject jsonBody = new JSONObject();
+        jsonBody.put("user_id", utils.getUserIdFromToken(this, accessToken, refreshToken));
         jsonBody.put("body", details);
         jsonBody.put("room", rooms);
         jsonBody.put("type", repairType);

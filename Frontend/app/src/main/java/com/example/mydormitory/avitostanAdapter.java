@@ -71,7 +71,8 @@ public class avitostanAdapter extends RecyclerView.Adapter<avitostanAdapter.Avit
                 }
             });
         }
-        else {
+        else
+        {
             holder.btnDeleteFromAvitostan.setVisibility(View.GONE);
         }
     }

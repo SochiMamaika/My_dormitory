@@ -83,17 +83,10 @@ public class avitostanActivity extends AppCompatActivity
             startActivity(intent);
         });
 
-        // Показываем/скрываем кнопку добавления в зависимости от роли
-        if (hasAvitostanWriteRole) {
-            addAvitoButton.setVisibility(View.VISIBLE);
-            addAvitoButton.setOnClickListener(v -> {
-                Intent intent = new Intent(avitostanActivity.this, addAvitoActivity.class);
-                startActivity(intent);
-            });
-        }
-        else {
-            addAvitoButton.setVisibility(View.GONE);
-        }
+        addAvitoButton.setOnClickListener(v -> {
+            Intent intent = new Intent(avitostanActivity.this, addAvitoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void deleteAvitostanFromServer(int id, int position) {

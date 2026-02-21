@@ -38,12 +38,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-
 public class reserveMachineActivity extends AppCompatActivity {
 
     private static final String API_URL = "http://10.0.2.2:3000/washmachine";
@@ -58,6 +52,7 @@ public class reserveMachineActivity extends AppCompatActivity {
     private List<ReserveWashMachine> userReservationObjects = new ArrayList<>();
     private String accessToken;
     private String refreshToken;
+    private boolean hasWashMachineWriteRole = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +71,7 @@ public class reserveMachineActivity extends AppCompatActivity {
             finish();
             return;
         }
+        hasWashMachineWriteRole = utils.hasRole(this, accessToken, refreshToken, "wash_machine_write");
 
         menuButton = findViewById(R.id.menuButton);
         addWashMachineButton = findViewById(R.id.addWashMachineButton);
@@ -108,10 +104,20 @@ public class reserveMachineActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        addWashMachineButton.setOnClickListener(v -> {
-            Intent intent = new Intent(reserveMachineActivity.this, addWashMachineActivity.class);
-            startActivity(intent);
-        });
+
+
+        if (hasWashMachineWriteRole)
+        {
+            addWashMachineButton.setVisibility(View.VISIBLE);
+            addWashMachineButton.setOnClickListener(v -> {
+                Intent intent = new Intent(reserveMachineActivity.this, addWashMachineActivity.class);
+                startActivity(intent);
+            });
+        }
+        else
+        {
+            addWashMachineButton.setVisibility(View.GONE);
+        }
     }
 
     private void showDatesForSelectedMachine() {

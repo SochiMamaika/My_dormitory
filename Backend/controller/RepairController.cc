@@ -3,6 +3,7 @@
 void RepairController::postRepair(const HttpRequestPtr& req,
                                   std::function<void(const HttpResponsePtr&)>&& callback)
 {
+    LOG_ERROR << "Зашли в метод postRepair";
     std::string token = Headerhelper::getTokenFromHeaders(req);
     auto decoded = jwt::decode<traits>(token);
     if (!Headerhelper::verifyToken(decoded)) 

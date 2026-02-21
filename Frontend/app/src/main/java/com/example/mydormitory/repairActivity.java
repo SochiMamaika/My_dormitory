@@ -47,5 +47,4 @@ public class repairActivity extends AppCompatActivity
             startActivity(intent);
         });
     }
-
 }

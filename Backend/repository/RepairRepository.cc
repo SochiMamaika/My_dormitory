@@ -12,7 +12,7 @@
     (
         "INSERT INTO repair (type, body, room, user_id, activity) "
         "VALUES ($1, $2, $3, $4, false) "
-        "RETURNING id, type, body, room, date, user_id, activity",
+        "RETURNING id, type, body, room, date, user_id, activity, repairman_id",
         type, body, room, user_id
     );
     
