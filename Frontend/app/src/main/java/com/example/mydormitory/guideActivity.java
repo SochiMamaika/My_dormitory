@@ -117,7 +117,7 @@ public class guideActivity extends AppCompatActivity {
                     if (success)
                     {
                         guideList.remove(position);
-                        guideAdapter.notifyItemRemoved(position);
+                        guideAdapter.updateData(guideList);
                         Toast.makeText(guideActivity.this, "Объявление удалено", Toast.LENGTH_SHORT).show();
                     }
                     else

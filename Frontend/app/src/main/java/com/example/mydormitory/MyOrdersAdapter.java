@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairManAdapter.NewsViewHolder> {
+public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.NewsViewHolder> {
 
     private List<newsforrepairman> newsList;
     private OnRepairButtonClickListener listener;
@@ -30,14 +30,9 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
         void onDeleteButtonClick(int position, newsforrepairman news);
     }
 
-    public NewsForRepairManAdapter(List<newsforrepairman> newsList) {
+    public MyOrdersAdapter(List<newsforrepairman> newsList) {
         this.newsList = newsList;
     }
-
-    public void setOnRepairButtonClickListener(OnRepairButtonClickListener listener) {
-        this.listener = listener;
-    }
-
     public void setOnDeleteButtonClickListener(OnDeleteButtonClickListener listener) {
         this.deleteListener = listener;
     }
@@ -46,7 +41,7 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
     @Override
     public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.newsforrepairman_item, parent, false);
+                .inflate(R.layout.my_orders_item, parent, false);
         return new NewsViewHolder(view);
     }
 
@@ -60,48 +55,30 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
         holder.repairmanRoom.setText("Комната: " + news.getRoom());
         holder.filesContainerForRepairman.removeAllViews();
 
-        if (news.getEnding()) {
-            // Заказ завершен - ждем подтверждения от студента
-            holder.repairmanActivity.setText("Ждем подтверждение");
-            holder.buttonActivity.setVisibility(View.GONE);  // Скрываем основную кнопку
-            holder.buttonDeleteRepair.setVisibility(View.VISIBLE);  // Показываем кнопку отмены
-            holder.buttonDeleteRepair.setText("Отмена Завершения");
-            holder.itemView.setAlpha(0.7f);
-        }
-        else if (news.getActivity()) {
-            // Заказ активен (взят в работу)
-            holder.repairmanActivity.setText("Заказ занят");
-            holder.buttonActivity.setText("Отменить заказ");
-            holder.buttonActivity.setVisibility(View.VISIBLE);
-            holder.buttonDeleteRepair.setVisibility(View.VISIBLE);
-            holder.buttonDeleteRepair.setText("Завершить заказ");
-            holder.itemView.setAlpha(1.0f);
+        // Проверяем - если ending = true, показываем кнопку подтверждения
+        if (news.getEnding())
+        {
+            holder.repairmanActivity.setText("Ремонт выполнен, ожидает подтверждения");
+            holder.buttonEndingRepair.setVisibility(View.VISIBLE);
+            holder.buttonEndingRepair.setText("Подтвердить выполнение");
         }
 
-        else {
-            holder.repairmanActivity.setText("Заказ свободен");
-            holder.buttonActivity.setText("Взять заказ");
-            holder.buttonDeleteRepair.setVisibility(View.GONE);
+        else
+        {
+            // Если ending = false, скрываем кнопку
+            holder.repairmanActivity.setText("Ремонт в процессе");
+            holder.buttonEndingRepair.setVisibility(View.GONE);
         }
 
+        // Загружаем изображения
         if (news.getNewsPath() != null && !news.getNewsPath().isEmpty()) {
             for (int i = 0; i < news.getNewsPath().size(); i++) {
                 addImageToContainer(holder.filesContainerForRepairman, news.getNewsPath().get(i));
             }
         }
 
-        // Обработка клика по кнопке активности (Взять/Отменить)
-        holder.buttonActivity.setOnClickListener(v -> {
-            if (listener != null) {
-                int adapterPosition = holder.getAdapterPosition();
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    listener.onRepairButtonClick(adapterPosition, news);
-                }
-            }
-        });
-
-        // Обработка клика по кнопке удаления
-        holder.buttonDeleteRepair.setOnClickListener(v -> {
+        // Кнопка подтверждения (показывается только когда ending = true)
+        holder.buttonEndingRepair.setOnClickListener(v -> {
             if (deleteListener != null) {
                 int adapterPosition = holder.getAdapterPosition();
                 if (adapterPosition != RecyclerView.NO_POSITION) {
@@ -149,7 +126,7 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
 
     public static class NewsViewHolder extends RecyclerView.ViewHolder {
         TextView typeRepairman, repairmanBody, repairmanDate, repairmanRoom, repairmanActivity;
-        Button buttonActivity, buttonDeleteRepair;
+        Button  buttonEndingRepair;
         LinearLayout filesContainerForRepairman;
 
         public NewsViewHolder(@NonNull View itemView) {
@@ -160,8 +137,7 @@ public class NewsForRepairManAdapter extends RecyclerView.Adapter<NewsForRepairM
             repairmanRoom = itemView.findViewById(R.id.repairmanRoom);
             filesContainerForRepairman = itemView.findViewById(R.id.filesContainerForRepairman);
             repairmanActivity = itemView.findViewById(R.id.repairmanActivity);
-            buttonActivity = itemView.findViewById(R.id.buttonActivity);
-            buttonDeleteRepair = itemView.findViewById(R.id.buttonDeleteRepair);
+            buttonEndingRepair = itemView.findViewById(R.id.buttonEndingRepair);
         }
     }
 }

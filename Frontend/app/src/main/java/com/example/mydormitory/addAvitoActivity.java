@@ -66,85 +66,78 @@ public class addAvitoActivity extends AppCompatActivity
             finish();
         }
 
-        backToAvitoButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent (addAvitoActivity.this, avitostanActivity.class);
-                startActivity(intent);
-            }
+        backToAvitoButton.setOnClickListener(v -> {
+            Intent intent = new Intent (addAvitoActivity.this, avitostanActivity.class);
+            startActivity(intent);
         });
 
-        addPhotoForAvitostan.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(intent, PICK_IMAGE_REQUEST);
-            }
+        addPhotoForAvitostan.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
         });
 
-        publishAvitostanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String type = categoryAvitostan.getSelectedItem().toString();
-                String body = bodyAvitostan.getText().toString();
-                String room = roomAvitostan.getText().toString();
-                if(type.equals("Выберите категорию") || body.isEmpty() || room.isEmpty())
-                {
-                    Toast.makeText(addAvitoActivity.this, "Нужно заполнить все поля", Toast.LENGTH_SHORT).show();
+        publishAvitostanButton.setOnClickListener(v -> {
+            String type = categoryAvitostan.getSelectedItem().toString();
+            String body = bodyAvitostan.getText().toString();
+            String room = roomAvitostan.getText().toString();
+            if(type.equals("Выберите категорию") || body.isEmpty() || room.isEmpty())
+            {
+                Toast.makeText(addAvitoActivity.this, "Нужно заполнить все поля", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int rooms;
+            try {
+                rooms = Integer.parseInt(room);
+                if (rooms <= 0) {
+                    Toast.makeText(addAvitoActivity.this, "Номер комнаты должен быть больше 0", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                int rooms = Integer.parseInt(room);
-
-                // Запускаем в отдельном потоке чтобы не блокировать UI
-                new Thread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            // 1. Отправляем фото и получаем их пути
-                            List<String> photoPaths = new ArrayList<>();
-                            for (Uri imageUri : selectedImages)
-                            {
-                                String path = utils.uploadFileToServer(addAvitoActivity.this, imageUri, "thing", "photo");
-                                photoPaths.add(path);
-                            }
-
-                            // 2. Отправляем данные о ремонте
-                            sendAvitostanData(type,
-                                              body,
-                                              rooms,
-                                              photoPaths,
-                                              accessToken,
-                                              refreshToken);
-
-                            // Показываем успех
-                            runOnUiThread(() -> {
-                                Toast.makeText(addAvitoActivity.this, "Успешно отправлено!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(addAvitoActivity.this, avitostanActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                                finish();
-                            });
-
-                        }
-                        catch (Exception e)
-                        {
-                            runOnUiThread(() -> {
-                                Toast.makeText(addAvitoActivity.this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    }
-                }).start();
-
             }
+            catch (NumberFormatException e) {
+                Toast.makeText(addAvitoActivity.this, "Комната должна быть числом", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Запускаем в отдельном потоке чтобы не блокировать UI
+            new Thread(() -> {
+                try
+                {
+                    // 1. Отправляем фото и получаем их пути
+                    List<String> photoPaths = new ArrayList<>();
+                    for (Uri imageUri : selectedImages)
+                    {
+                        String path = utils.uploadFileToServer(addAvitoActivity.this, imageUri, "thing", "photo");
+                        photoPaths.add(path);
+                    }
+
+                    // 2. Отправляем данные о ремонте
+                    sendAvitostanData(type,
+                                      body,
+                                      rooms,
+                                      photoPaths,
+                                      accessToken,
+                                      refreshToken);
+
+                    // Показываем успех
+                    runOnUiThread(() -> {
+                        Toast.makeText(addAvitoActivity.this, "Успешно отправлено!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(addAvitoActivity.this, avitostanActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    });
+
+                }
+                catch (Exception e)
+                {
+                    runOnUiThread(() -> {
+                        Toast.makeText(addAvitoActivity.this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+
         });
     }
     @Override

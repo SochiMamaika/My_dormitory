@@ -226,7 +226,8 @@
             android:text="Выдать права администратора"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/removeAdminButton"
@@ -236,7 +237,8 @@
             android:text="Забрать права администратора"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

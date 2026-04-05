@@ -32,23 +32,35 @@ void ReserveWashMachineController::postReserveWashMachine(const HttpRequestPtr &
     // 3. Получаем подключение к БД
     auto dbClient = drogon::app().getDbClient();
     ReserveWashMachineService washmachine(dbClient);
-    auto machine = washmachine.createReserveWashMachine(userId,
-                                                        machineId,
-                                                        date,
-                                                        time_start,
-                                                        duration);
-    
-    Json::Value respJson;
-    respJson["id"] = machine.getId();
-    respJson["user_id"] = machine.getUserId();
-    respJson["machine_id"] = machine.getMachineId();
-    respJson["date"] = machine.getDate();
-    respJson["start_time"] = machine.getStartTime();
-    respJson["duration"] = machine.getDuration();
 
-    auto resp = HttpResponse::newHttpJsonResponse(respJson);
-    resp->setStatusCode(k201Created);
-    callback(resp);
+    try 
+    {
+        auto machine = washmachine.createReserveWashMachine(userId,
+                                                            machineId,
+                                                            date,
+                                                            time_start,
+                                                            duration);
+        
+        Json::Value respJson;
+        respJson["id"] = machine.getId();
+        respJson["user_id"] = machine.getUserId();
+        respJson["machine_id"] = machine.getMachineId();
+        respJson["date"] = machine.getDate();
+        respJson["start_time"] = machine.getStartTime();
+        respJson["duration"] = machine.getDuration();
+
+        auto resp = HttpResponse::newHttpJsonResponse(respJson);
+        resp->setStatusCode(k201Created);
+        callback(resp);
+    }
+    catch (const std::exception& e)
+    {
+        Json::Value error;
+        error["error"] = e.what();
+        auto resp = HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(k400BadRequest);
+        callback(resp);
+    }
 }
 
 void ReserveWashMachineController::getReserveWashMachines(const HttpRequestPtr &req,

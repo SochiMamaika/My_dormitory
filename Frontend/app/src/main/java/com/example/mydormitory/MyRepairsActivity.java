@@ -40,12 +40,13 @@ public class MyRepairsActivity extends AppCompatActivity implements
     private List<newsforrepairman> allRepairs = new ArrayList<>(); // Полный список всех заказов
 
     private static final String MY_REPAIRS_URL = "http://10.0.2.2:3000/myrepair";
-    private static final String REPAIRS_DELETE = "http://10.0.2.2:3000/repair/";
+    private static final String REPAIRS_DELETE = "http://10.0.2.2:3000/endingrepair";
     private static final String UPDATE_STATUS_URL = "http://10.0.2.2:3000/activaterepair";
 
     private String accessToken;
     private String refreshToken;
     private int currentUserId;
+    private String userType;
 
     private String currentProfession = "Все профессии"; // Текущая выбранная профессия
 
@@ -59,6 +60,7 @@ public class MyRepairsActivity extends AppCompatActivity implements
         accessToken = prefs.getString("access_token", null);
         refreshToken = prefs.getString("refresh_token", null);
         currentUserId = utils.getUserIdFromToken(this, accessToken, refreshToken);
+        userType = prefs.getString("type", null);
 
         if (accessToken == null) {
             startActivity(new Intent(this, loginActivity.class));
@@ -100,7 +102,10 @@ public class MyRepairsActivity extends AppCompatActivity implements
 
     @Override
     public void onDeleteButtonClick(int position, newsforrepairman news) {
-        deleteRepair(news.getId(), position);
+        boolean status = !news.getEnding();
+        deleteRepair(status, news.getId(), position);
+        news.setEnding(status);
+
     }
 
     // Обработка выбора в Spinner
@@ -159,25 +164,28 @@ public class MyRepairsActivity extends AppCompatActivity implements
         }).start();
     }
 
-    private void deleteRepair(int repairId, int position) {
+    private void deleteRepair(boolean status, int repairId, int position) {
         final int finalPosition = position;
         new Thread(() -> {
             try {
-                boolean success = sendDeleteRequest(repairId);
+                sendDeleteRequest(REPAIRS_DELETE, accessToken, repairId, status, currentUserId);
 
                 runOnUiThread(() -> {
-                    if (success) {
-                        if (finalPosition >= 0 && finalPosition < repairs.size()) {
-                            // Удаляем из обоих списков
-                            newsforrepairman removed = repairs.remove(finalPosition);
-                            allRepairs.remove(removed);
-                            adapter.notifyItemRemoved(finalPosition);
-                            Toast.makeText(this, "Заказ удалён", Toast.LENGTH_SHORT).show();
-                        } else {
-                            loadMyRepairs();
+                    if (finalPosition >= 0 && finalPosition < repairs.size()) {
+                        if (status)
+                        {
+                            adapter.notifyItemChanged(finalPosition);
+                            Toast.makeText(this, "Заказ завершен ждем подтверждения студента", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(this, "Ошибка удаления", Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            adapter.notifyItemChanged(finalPosition);
+                            Toast.makeText(this, "Заказ снова активен", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    else
+                    {
+                        loadMyRepairs();
                     }
                 });
             } catch (Exception e) {
@@ -188,31 +196,59 @@ public class MyRepairsActivity extends AppCompatActivity implements
         }).start();
     }
 
-    private boolean sendDeleteRequest(int repairId) throws Exception {
-        String url = REPAIRS_DELETE + repairId + "/" + currentUserId;
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        private void sendDeleteRequest(String urlString, String accessToken, int repairId, boolean newStatus, int userId) throws Exception {
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("repair_id", repairId);
+            jsonBody.put("ending", newStatus);
+            jsonBody.put("user_id", userId);
 
-        conn.setRequestMethod("DELETE");
-        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+            connection.setDoOutput(true);
 
-        int responseCode = conn.getResponseCode();
-
-        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-            conn.disconnect();
-            if (utils.refreshAccessToken(this, refreshToken)) {
-                SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-                accessToken = prefs.getString("access_token", null);
-                refreshToken = prefs.getString("refresh_token", null);
-                return sendDeleteRequest(repairId);
-            } else {
-                handleSessionExpired();
-                return false;
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8")))
+            {
+                writer.write(jsonBody.toString());
             }
-        }
 
-        return responseCode == HttpURLConnection.HTTP_OK ||
-                responseCode == HttpURLConnection.HTTP_NO_CONTENT;
-    }
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED)
+            {
+                connection.disconnect();
+                if (utils.refreshAccessToken(MyRepairsActivity.this, refreshToken))
+                {
+                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                    String newAccess = prefs.getString("access_token", null);
+                    String newRefresh = prefs.getString("refresh_token", null);
+                    MyRepairsActivity.this.accessToken = newAccess;
+                    MyRepairsActivity.this.refreshToken = newRefresh;
+                    sendDeleteRequest(urlString, newAccess, repairId, newStatus, userId);
+                    return;
+                }
+                else
+                {
+                    handleSessionExpired();
+                    return;
+                }
+            }
+
+            if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED)
+            {
+                BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                StringBuilder errorResponse = new StringBuilder();
+                String line;
+                while ((line = errorReader.readLine()) != null)
+                {
+                    errorResponse.append(line);
+                }
+                errorReader.close();
+                throw new Exception("Ошибка отправки данных: " + errorResponse.toString());
+            }
+            connection.disconnect();
+        }
 
     private void loadMyRepairs() {
         new Thread(() -> {
@@ -245,7 +281,7 @@ public class MyRepairsActivity extends AppCompatActivity implements
     }
 
     private String sendGetRequest() throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(MY_REPAIRS_URL).openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL(MY_REPAIRS_URL + "/" + userType).openConnection();
 
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Authorization", "Bearer " + accessToken);

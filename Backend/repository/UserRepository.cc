@@ -441,7 +441,7 @@ bool UserRepository::deleteUser(int id)
 void UserRepository::addRole(int user_id) 
 {
     auto trans = db_->newTransaction();
-    std::vector<std::string> roleNames = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write"};
+    std::vector<std::string> roleNames = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write", "thing_write"};
     
     for (const auto &roleName : roleNames)
     {
@@ -479,7 +479,7 @@ bool UserRepository::deleteRole(int user_id)
     auto trans = db_->newTransaction();
     
     // Удаляем все роли, которые были добавлены через addRole()
-    std::vector<std::string> rolesToDelete = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write"};
+    std::vector<std::string> rolesToDelete = {"news_write", "user_write", "tutor_write", "file_write", "wash_machine_write", "repair_write", "role_write", "thing_write"};
     
     for (const auto &roleName : rolesToDelete)
     {

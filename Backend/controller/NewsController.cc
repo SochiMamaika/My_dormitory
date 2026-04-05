@@ -82,6 +82,7 @@ void NewsController::getNews(const HttpRequestPtr& req,
             jsonNewsItem["room"] = news_current.getRoom();
             jsonNewsItem["user_id"] = news_current.getUserId();
             jsonNewsItem["activity"] = news_current.getActivity();
+            jsonNewsItem["ending"] = news_current.getEnding();
             jsonNewsItem["repairman_id"] = news_current.getRepairmanId();
             
             // Добавляем массив изображений

@@ -495,7 +495,7 @@ public class reserveMachineActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(reserveMachineActivity.this, "Ошибка загрузки: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(reserveMachineActivity.this, "Ошибка загрузки: Проверьте корректность данных " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         }).start();
     }

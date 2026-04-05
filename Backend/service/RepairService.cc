@@ -28,6 +28,16 @@ bool RepairService::changeActivateRepair(int id,
 }
 
 
+bool RepairService::changeEndingRepair(int id,
+                                       bool ending,
+                                       int repairman_id)
+{
+    return repository->changeEndingRepair(id,
+                                          ending,
+                                          repairman_id);
+}
+
+
 bool RepairService::deleteRepair(int id_repair)
 {
     return repository->deleteRepair(id_repair);
@@ -38,7 +48,7 @@ std::list<Repair> RepairService::getRepairs()
     return repository->getRepairs();
 }
 
-std::list<Repair> RepairService::getMyRepairs(int user_id)
+std::list<Repair> RepairService::getMyRepairs(int user_id, std::string user_type)
 {
-    return repository->getMyRepairs(user_id);
+    return repository->getMyRepairs(user_id, user_type);
 }

@@ -407,6 +407,7 @@ public class utils {
             int user_id = guideJson.getInt("user_id");
             boolean activity = guideJson.getBoolean("activity");
             int repairman_id = guideJson.getInt("repairman_id");
+            boolean ending = guideJson.getBoolean("ending");
 
             // Парсим массив изображений
             List<String> imagePaths = new ArrayList<>();
@@ -417,7 +418,7 @@ public class utils {
                 }
             }
 
-            news.add(new newsforrepairman(id, type, body, date, room, user_id, repairman_id, activity, imagePaths));
+            news.add(new newsforrepairman(id, type, body, date, room, user_id, repairman_id, activity, ending, imagePaths));
         }
 
         return news;

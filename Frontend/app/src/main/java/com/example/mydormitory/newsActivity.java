@@ -129,7 +129,7 @@ public class newsActivity extends AppCompatActivity
                     if (success)
                     {
                         newsList.remove(position);
-                        newsAdapter.notifyItemRemoved(position);
+                        newsAdapter.updateData(newsList);
                         Toast.makeText(newsActivity.this, "Новость удалена", Toast.LENGTH_SHORT).show();
                     }
                     else

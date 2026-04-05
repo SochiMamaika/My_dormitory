@@ -69,47 +69,51 @@
     <activity
         android:name=".addAvitoActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".addRepairActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".addGuideActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".addNewsActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".addDocumentsActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".fullScreenImageActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".addWashMachineActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".MyRepairsActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".allWidjetForRepairman"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".searchActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
     <activity
         android:name=".UserDetailActivity"
         android:exported="false"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
+    <activity
+        android:name=".MyOrders"
+        android:exported="false"
+        android:theme="@style/Theme.MyDormitory.NoActionBar" />
 </application>
 
     </manifest>

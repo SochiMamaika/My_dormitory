@@ -88,7 +88,8 @@ void RepairController::postRepair(const HttpRequestPtr& req,
 
 
 void RepairController::getMyRepairs(const HttpRequestPtr& req,
-                            std::function<void(const HttpResponsePtr&)>&& callback)
+                                    std::function<void(const HttpResponsePtr&)>&& callback,
+                                    std::string user_type)
 {
     LOG_ERROR << "Зашли в getMyRepair для ремонтника";
     std::string token = Headerhelper::getTokenFromHeaders(req);
@@ -99,11 +100,11 @@ void RepairController::getMyRepairs(const HttpRequestPtr& req,
         return;
     }
     int user_id = decoded.get_payload_claim("Id").as_integer();
-    LOG_ERROR << "получили user_id "<<user_id;
+    LOG_ERROR << "получили user_id "<<user_id, user_type;
     // 3. Получаем подключение к БД
     auto dbClient = drogon::app().getDbClient();
     RepairService repair(dbClient);
-    auto repair_data = repair.getMyRepairs(user_id);
+    auto repair_data = repair.getMyRepairs(user_id, user_type);
 
         // Формируем JSON-ответ
         Json::Value jsonNewsArray;
@@ -118,6 +119,7 @@ void RepairController::getMyRepairs(const HttpRequestPtr& req,
             jsonNewsItem["user_id"] = news_current.getUserId();
             jsonNewsItem["activity"] = news_current.getActivity();
             jsonNewsItem["repairman_id"] = news_current.getRepairmanId();
+            jsonNewsItem["ending"] = news_current.getEnding();
             
             // Добавляем массив изображений
             Json::Value jsonImages(Json::arrayValue);
@@ -182,6 +184,72 @@ void RepairController::activateRepair(const HttpRequestPtr& req,
         jsonResponse["message"] = "Repair activity updated successfully";
         jsonResponse["id"] = repair_id;
         jsonResponse["new_activity"] = activity; // или !activity если инвертируется
+        
+        auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
+        resp->setStatusCode(k200OK); // 200 OK - успешное обновление
+        callback(resp);
+    }
+    else 
+    {
+        // JSON ответ с ошибкой
+        Json::Value jsonResponse;
+        jsonResponse["success"] = false;
+        jsonResponse["error"] = "Failed to update repair activity";
+        jsonResponse["id"] = repair_id;
+        
+        auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
+        resp->setStatusCode(k400BadRequest);
+        callback(resp);
+    }
+}
+
+void RepairController::endingRepair(const HttpRequestPtr& req,
+                            std::function<void(const HttpResponsePtr&)>&& callback)
+{
+    LOG_ERROR << "Зашли в endingRepair";
+    std::string token = Headerhelper::getTokenFromHeaders(req);
+    auto decoded = jwt::decode<traits>(token);
+    if (!Headerhelper::verifyToken(decoded)) 
+    {
+        Headerhelper::responseCheckToken(callback);
+        return;
+    }
+    // Получаем JSON данные
+    auto json = req->getJsonObject();
+    if (!json) 
+    {
+        Headerhelper::responseCheckJson(callback);
+        return;
+    }
+    // Извлекаем данные из JSON
+    int repair_id = json->get("repair_id", "").asInt();
+    bool ending = json->get("ending", "").asBool();
+    int repairman_id = json->get("user_id", "").asInt();
+    LOG_ERROR << "Извлекли данные"<<repairman_id, ending;
+    
+    if (ending != true && ending != false)
+    {
+        auto resp = HttpResponse::newHttpResponse();
+        resp->setStatusCode(k400BadRequest);
+        callback(resp);
+    }
+    
+
+    // 3. Получаем подключение к БД
+    auto dbClient = drogon::app().getDbClient();
+    RepairService repair(dbClient);
+    auto success = repair.changeEndingRepair(repair_id,
+                                               ending,
+                                               repairman_id);
+
+    if (success)
+    {
+        // Простой JSON ответ с успехом
+        Json::Value jsonResponse;
+        jsonResponse["success"] = true;
+        jsonResponse["message"] = "Repair activity updated successfully";
+        jsonResponse["id"] = repair_id;
+        jsonResponse["new_ending"] = ending; // или !activity если инвертируется
         
         auto resp = HttpResponse::newHttpJsonResponse(jsonResponse);
         resp->setStatusCode(k200OK); // 200 OK - успешное обновление

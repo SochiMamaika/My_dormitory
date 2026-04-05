@@ -12,7 +12,7 @@
     (
         "INSERT INTO repair (type, body, room, user_id, activity) "
         "VALUES ($1, $2, $3, $4, false) "
-        "RETURNING id, type, body, room, date, user_id, activity, repairman_id",
+        "RETURNING id, type, body, room, date, user_id, activity, ending, repairman_id",
         type, body, room, user_id
     );
     
@@ -48,6 +48,21 @@ bool RepairRepository::changeActivateRepair(int id,
         "set activity = $1, repairman_id = $2 "
         "where id = $3 ",
         activity, repairman_id, id
+    );
+    return totalResult.affectedRows() > 0;
+}
+
+
+bool RepairRepository::changeEndingRepair(int id,
+                                          bool ending,
+                                          int repairman_id)
+{
+    auto totalResult = db_->execSqlSync
+    (
+        "update repair "
+        "set ending = $1, repairman_id = $2 "
+        "where id = $3 ",
+        ending, repairman_id, id
     );
     return totalResult.affectedRows() > 0;
 }
@@ -125,40 +140,82 @@ std::list<Repair> RepairRepository::getRepairs()
     return repair_all;
 }
 
-std::list<Repair> RepairRepository::getMyRepairs(int repairman_id)
+std::list<Repair> RepairRepository::getMyRepairs(int repairman_id, std::string user_type)
 {
-    auto tran = db_->newTransaction();
-    auto result = tran->execSqlSync
-    (
-        "SELECT * FROM repair "
-        "WHERE repairman_id = $1 AND activity = true "
-        "ORDER BY date DESC ",
-        repairman_id
-    );
-    
-    std::list<Repair> repair_all;
-    for (const auto& row : result) 
+    if (user_type == "Ремонтник")
     {
-        Repair repair;
-        repair.fromDb(row);
-        int repair_id = repair.getId();
-        // Получаем файлы
-        auto files_result = tran->execSqlSync
+        auto tran = db_->newTransaction();
+        auto result = tran->execSqlSync
         (
-            "SELECT image_path FROM repair_file "
-            "WHERE repair_id = $1 "
-            "ORDER BY repair_id",
-            repair_id
+            "SELECT * FROM repair "
+            "WHERE repairman_id = $1 AND activity = true "
+            "ORDER BY date DESC ",
+            repairman_id
         );
         
-        std::list<std::string> repair_paths;
-        for (const auto& file_row : files_result) 
+        std::list<Repair> repair_all;
+        for (const auto& row : result) 
         {
-            repair_paths.push_back(file_row["image_path"].as<std::string>());
+            Repair repair;
+            repair.fromDb(row);
+            int repair_id = repair.getId();
+            // Получаем файлы
+            auto files_result = tran->execSqlSync
+            (
+                "SELECT image_path FROM repair_file "
+                "WHERE repair_id = $1 "
+                "ORDER BY repair_id",
+                repair_id
+            );
+            
+            std::list<std::string> repair_paths;
+            for (const auto& file_row : files_result) 
+            {
+                repair_paths.push_back(file_row["image_path"].as<std::string>());
+            }
+            repair.setRepairPaths(repair_paths);
+            
+            repair_all.push_back(repair);
         }
-        repair.setRepairPaths(repair_paths);
-        
-        repair_all.push_back(repair);
+        return repair_all;
     }
-    return repair_all;
+    
+    else
+    {
+        int user_id = repairman_id;
+        auto tran = db_->newTransaction();
+        auto result = tran->execSqlSync
+        (
+            "SELECT * FROM repair "
+            "WHERE user_id = $1 "
+            "ORDER BY date DESC ",
+            user_id
+        );
+        
+        std::list<Repair> repair_all;
+        for (const auto& row : result) 
+        {
+            Repair repair;
+            repair.fromDb(row);
+            int repair_id = repair.getId();
+            // Получаем файлы
+            auto files_result = tran->execSqlSync
+            (
+                "SELECT image_path FROM repair_file "
+                "WHERE repair_id = $1 "
+                "ORDER BY repair_id",
+                repair_id
+            );
+            
+            std::list<std::string> repair_paths;
+            for (const auto& file_row : files_result) 
+            {
+                repair_paths.push_back(file_row["image_path"].as<std::string>());
+            }
+            repair.setRepairPaths(repair_paths);
+            
+            repair_all.push_back(repair);
+        }
+        return repair_all;
+    }
 }

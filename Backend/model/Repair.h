@@ -14,6 +14,7 @@ class Repair
     int user_id;
     bool activity;
     int repairman_id;
+    bool ending;
 
     public:
         void fromDb(const drogon::orm::Row& result)
@@ -26,6 +27,7 @@ class Repair
             user_id = result["user_id"].as<int>();
             activity = result["activity"].as<bool>();
             repairman_id = result["repairman_id"].as<int>();
+            ending = result["ending"].as<bool>();
         }
 
         // Setters
@@ -113,5 +115,10 @@ class Repair
         bool getActivity()
         {
             return activity;
+        }
+
+        bool getEnding()
+        {
+            return ending;
         }
 };

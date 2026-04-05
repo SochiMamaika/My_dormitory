@@ -120,7 +120,7 @@ public class documentsActivity extends AppCompatActivity
                     if (success)
                     {
                         documentsList.remove(position);
-                        documentsAdapter.notifyItemRemoved(position);
+                        documentsAdapter.updateData(documentsList);
 
                         Toast.makeText(documentsActivity.this, "Документ удалён", Toast.LENGTH_SHORT).show();
                     }
